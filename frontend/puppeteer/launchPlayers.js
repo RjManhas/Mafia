@@ -49,7 +49,7 @@ function busyWait(seconds) {
     }
 
     // Change the url here to open different sites
-    const url = 'http://localhost:3000/';
+    const url = 'http://178.156.137.192:3000/';
 
     let browser;
     try {

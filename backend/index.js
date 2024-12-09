@@ -50,9 +50,9 @@ io.on('connection', (socket) => {
 });
 
 // Start the server on our predetermined port number.
-server.listen(port, () => {
+server.listen(port, '178.156.137.192', () => {
     // eslint-disable-next-line no-console
-    console.log(`Listening on *:${port}`);
+    console.log(`Listening on 178.156.137.192:${port}`);
 });
 
 // Export the server for testing
