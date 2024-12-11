@@ -39,10 +39,24 @@ function joinLobby(io, socket, mafiaGame) {
     // on join lobby message event will call join lobby event handler
     socket.on('join-lobby', (joinLobbyDTO) => {
         const room = mafiaGame.gameRoomsDict[joinLobbyDTO.roomCode];
+
+        // Check if the room exists
         if (room === undefined) {
-            // TODO: Handle non-existent room after MVP is done.
-            // eslint-disable-next-line no-console
             console.log(`Lobby ${joinLobbyDTO.roomCode} doesn't exist`);
+            socket.emit('error', { message: 'Invalid room ID.' });
+            return;
+        }
+
+        // Check if the room is full
+        if (room.players.length >= room.maxPlayerCount) {
+            socket.emit('error', { message: 'Lobby is full. Cannot join.' });
+            return;
+        }
+
+        // Check for duplicate nickname
+        const existingPlayer = room.players.find(player => player.nickname === joinLobbyDTO.nickname);
+        if (existingPlayer) {
+            socket.emit('error', { message: 'Nickname already taken. Please choose another.' });
             return;
         }
 
