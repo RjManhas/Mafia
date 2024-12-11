@@ -36,9 +36,18 @@ function createLobby(io, socket, mafiaGame) {
  * @param {MafiaGame} mafiaGame
  */
 function joinLobby(io, socket, mafiaGame) {
-    // on join lobby message event will call join lobby event handler
     socket.on('join-lobby', (joinLobbyDTO) => {
+        if (!joinLobbyDTO || !joinLobbyDTO.roomCode || !joinLobbyDTO.nickname) {
+            socket.emit('error', { message: 'Invalid join request.' });
+            return; // Early return to prevent further errors
+        }
+
         const room = mafiaGame.gameRoomsDict[joinLobbyDTO.roomCode];
+
+        if (!room) {
+            socket.emit('error', { message: 'Invalid room ID.' });
+            return;
+        }
 
         // Check if the room exists
         if (room === undefined) {

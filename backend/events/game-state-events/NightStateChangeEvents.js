@@ -65,30 +65,39 @@ function startNight(io, socket, mafiaGame) {
  * @param {MafiaGame} mafiaGame
  */
 function endNight(io, socket, mafiaGame) {
-    const { roomID } = socket.player;
-    const room = mafiaGame.gameRoomsDict[roomID];
+    try {
+        const { roomID } = socket.player;
+        const room = mafiaGame.gameRoomsDict[roomID];
 
-    const playerKilled = room.voteHandler.getMafiaVotedPlayer();
+        if (!room) {
+            console.error(`Room with ID ${roomID} does not exist`);
+            return;
+        }
 
-    if (playerKilled) {
-        room.getPlayerByNickname(playerKilled).status = PlayerStatus.KILLED_BY_MAFIA;
+        const playerKilled = room.voteHandler.getMafiaVotedPlayer();
+
+        if (playerKilled) {
+            room.getPlayerByNickname(playerKilled).status = PlayerStatus.KILLED_BY_MAFIA;
+        }
+
+        const winningRole = room.getWinningRole();
+
+        if (winningRole !== null) {
+            io.in(roomID).emit('night-end', new NightEndDTO(playerKilled, true));
+            io.in(roomID).emit(
+                'game-over',
+                new GameOverDTO(
+                    winningRole,
+                    room.getPlayersByRole(winningRole).map((p) => p.nickname)
+                )
+            );
+        } else {
+            io.in(roomID).emit('night-end', new NightEndDTO(playerKilled, false));
+        }
+        room.voteHandler.resetVotes();
+    } catch (error) {
+        console.error('Error in endNight:', error);
     }
-
-    const winningRole = room.getWinningRole();
-
-    if (winningRole !== null) {
-        io.in(roomID).emit('night-end', new NightEndDTO(playerKilled, true));
-        io.in(roomID).emit(
-            'game-over',
-            new GameOverDTO(
-                winningRole,
-                room.getPlayersByRole(winningRole).map((p) => p.nickname)
-            )
-        );
-    } else {
-        io.in(roomID).emit('night-end', new NightEndDTO(playerKilled, false));
-    }
-    room.voteHandler.resetVotes();
 }
 
 /**

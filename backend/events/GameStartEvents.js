@@ -11,7 +11,19 @@ const config = require('../config.json');
  */
 function startGame(io, socket, mafiaGame) {
     socket.on('start-game', () => {
-        const room = mafiaGame.gameRoomsDict[socket.player.roomID];
+        if (!socket.player) {
+            console.error('Socket player is undefined');
+            return; // Early return to prevent further errors
+        }
+
+        const { roomID } = socket.player;
+        const room = mafiaGame.gameRoomsDict[roomID];
+
+        if (!room) {
+            console.error(`Room with ID ${roomID} does not exist`);
+            return; // Early return to prevent further errors
+        }
+
         const { players } = room;
         const availableRoles = getAvailableRolesToAssign(players.length);
 

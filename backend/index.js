@@ -31,6 +31,11 @@ app.get('/', (req, res) => {
 
 // Listen for a "connection" event for incoming sockets.
 io.on('connection', (socket) => {
+    socket.on('disconnect', () => {
+        console.log(`Socket ${socket.id} disconnected`);
+        // Handle any cleanup or state management here
+    });
+
     // this function catches any lobby events sent from client
     loadLobbyEvents(io, socket, mafiaGame);
 
